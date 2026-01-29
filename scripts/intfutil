@@ -549,6 +549,17 @@ class IntfStatus(object):
             for key in self.appl_db_sub_intf_keys:
                 sub_intf = re.split(':', key, maxsplit=1)[-1].strip()
                 if sub_intf in self.sub_intf_list:
+                    # Extract parent port from subinterface to check if it's internal
+                    sub_intf_sep_idx = sub_intf.find(VLAN_SUB_INTERFACE_SEPARATOR)
+                    if sub_intf_sep_idx != -1:
+                        parent_port = get_intf_longname(sub_intf[:sub_intf_sep_idx])
+                        # Skip subinterfaces on internal ports when display is external only
+                        if parent_port.startswith("Ethernet"):
+                            if self.multi_asic.skip_display(constants.PORT_OBJ, parent_port):
+                                continue
+                        elif parent_port.startswith("PortChannel"):
+                            if self.multi_asic.skip_display(constants.PORT_CHANNEL_OBJ, parent_port):
+                                continue
                     table.append((sub_intf,
                                 appl_db_sub_intf_status_get(self.db, self.config_db, self.front_panel_ports_list, self.portchannel_speed_dict, sub_intf, PORT_SPEED),
                                 appl_db_sub_intf_status_get(self.db, self.config_db, self.front_panel_ports_list, self.portchannel_speed_dict, sub_intf, PORT_MTU_STATUS),

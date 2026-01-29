@@ -11818,8 +11818,12 @@ This command displays all the subinterfaces that are configured on the device an
 
 - Usage:
   ```
-  show subinterfaces status
+  show subinterfaces status [<subinterfacename>] [-d <display>] [-n <namespace>]
   ```
+
+- Options:
+  - _-d,--display_: Show interfaces (all | frontend). Default is frontend.
+  - _-n,--namespace_: Namespace name or all
 
 - Example:
   ```
@@ -11830,35 +11834,77 @@ This command displays all the subinterfaces that are configured on the device an
       Ethernet0.100     100G   9100    100       up  dot1q-encapsulation
   ```
 
+- Example (Multi-ASIC, show subinterfaces for a specific namespace):
+  ```
+  admin@sonic:~$ show subinterfaces status -n asic0
+  Sub port interface    Speed    MTU    Vlan    Admin                 Type
+  ------------------  -------  -----  ------  -------  -------------------
+      Ethernet0.100     100G   9100    100       up  dot1q-encapsulation
+  ```
+
 ### Subinterfaces Config Commands
 
 This sub-section explains how to configure subinterfaces.
 
-**config subinterface**
+**config subinterface add**
+
+This command is used to add a subinterface.
 
 - Usage:
   ```
-  config subinterface (add | del) <subinterface_name> [vlan <1-4094>]
+  config subinterface [-n <namespace>] add <subinterface_name> [<vid>]
   ```
 
-- Example (Create the subinterfces with name "Ethernet0.100"):
+- Options:
+  - _-n,--namespace_: Namespace name (required on multi-ASIC systems)
+
+- Arguments:
+  - _subinterface_name_: Name of the subinterface (e.g., Ethernet0.100, Eth64.100)
+  - _vid_: VLAN ID (1-4094). Required for short name subinterfaces (e.g., Eth64.100, Po1.100). Optional for long name subinterfaces (e.g., Ethernet0.100, PortChannel1.100) where the VLAN ID can be inferred from the name suffix.
+
+- Example (Create the subinterface with name "Ethernet0.100"):
   ```
   admin@sonic:~$ sudo config subinterface add Ethernet0.100
   ```
 
-- Example (Create the subinterfces with name "Eth64.100"):
+- Example (Create the subinterface with name "Eth64.100" with explicit VLAN ID):
   ```
   admin@sonic:~$ sudo config subinterface add Eth64.100 100
   ```
 
-- Example (Delete the subinterfces with name "Ethernet0.100"):
+- Example (Multi-ASIC, create a subinterface in a specific namespace):
+  ```
+  admin@sonic:~$ sudo config subinterface -n asic0 add Ethernet0.100
+  ```
+
+**config subinterface del**
+
+This command is used to delete a subinterface.
+
+- Usage:
+  ```
+  config subinterface [-n <namespace>] del <subinterface_name>
+  ```
+
+- Options:
+  - _-n,--namespace_: Namespace name (required on multi-ASIC systems)
+
+- Arguments:
+  - _subinterface_name_: Name of the subinterface to delete
+
+- Example (Delete the subinterface with name "Ethernet0.100"):
   ```
   admin@sonic:~$ sudo config subinterface del Ethernet0.100
   ```
 
-- Example (Delete the subinterfces with name "Eth64.100"):
+- Example (Delete the subinterface with name "Eth64.100"):
   ```
-  admin@sonic:~$ sudo config subinterface del Eth64.100 100
+  admin@sonic:~$ sudo config subinterface del Eth64.100
+  ```
+
+- Example (Multi-ASIC, delete a subinterface in a specific namespace):
+  ```
+  admin@sonic:~$ sudo config subinterface -n asic0 del Ethernet0.100
   ```
 
 Go Back To [Beginning of the document](#) or [Beginning of this section](#subinterfaces)
