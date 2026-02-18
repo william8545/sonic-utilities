@@ -621,8 +621,9 @@ def subinterfaces():
 # 'subinterfaces' subcommand ("show subinterfaces status")
 @subinterfaces.command()
 @click.argument('subinterfacename', type=str, required=False)
+@multi_asic_util.multi_asic_click_options
 @click.option('--verbose', is_flag=True, help="Enable verbose output")
-def status(subinterfacename, verbose):
+def status(subinterfacename, namespace, display, verbose):
     """Show sub port interface status information"""
     cmd = ['intfutil', '-c', 'status']
 
@@ -638,6 +639,12 @@ def status(subinterfacename, verbose):
         cmd += ['-i', str(subinterfacename)]
     else:
         cmd += ['-i', 'subport']
+
+    if multi_asic.is_multi_asic():
+        cmd += ['-d', str(display)]
+    if namespace is not None:
+        cmd += ['-n', str(namespace)]
+
     run_command(cmd, display_cmd=verbose)
 
 #
