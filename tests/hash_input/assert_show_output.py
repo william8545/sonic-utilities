@@ -596,11 +596,7 @@ show_hash_capabilities_ecmp_and_lag_json="""\
 }
 """
 
-#
-# Multi-ASIC expected outputs
-#
-
-show_hash_global_multi_asic="""\
+show_hash_global_multi_asic = """\
 Namespace asic0:
 +--------+-------------------------------------+
 | Hash   | Configuration                       |
@@ -700,7 +696,7 @@ Namespace asic1:
 +--------+-------------------------------------+
 """
 
-show_hash_global_multi_asic_single_ns="""\
+show_hash_global_multi_asic_single_ns = """\
 +--------+-------------------------------------+
 | Hash   | Configuration                       |
 +========+=====================================+
@@ -750,7 +746,7 @@ show_hash_global_multi_asic_single_ns="""\
 +--------+-------------------------------------+
 """
 
-show_hash_capabilities_multi_asic="""\
+show_hash_capabilities_multi_asic = """\
 Namespace asic0:
 +--------+-------------------------------------+
 | Hash   | Capabilities                        |
@@ -858,7 +854,7 @@ Namespace asic1:
 +--------+-------------------------------------+
 """
 
-show_hash_capabilities_multi_asic_single_ns="""\
+show_hash_capabilities_multi_asic_single_ns = """\
 +--------+-------------------------------------+
 | Hash   | Capabilities                        |
 +========+=====================================+

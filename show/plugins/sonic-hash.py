@@ -239,14 +239,34 @@ def SWITCH_HASH_CAPABILITIES(ctx, db, json_format):
             if entry[SW_CAP_LAG_HASH_ALGORITHM_KEY] not in ["N/A", "no capabilities"]:
                 entry[SW_CAP_LAG_HASH_ALGORITHM_KEY] = entry[SW_CAP_LAG_HASH_ALGORITHM_KEY].split(',')
 
+            ecmp_hash_field = (
+                entry[SW_CAP_HASH_FIELD_LIST_KEY]
+                if entry[SW_CAP_ECMP_HASH_CAPABLE_KEY] == 'true'
+                else 'not supported'
+            )
+            ecmp_algorithm = (
+                entry[SW_CAP_ECMP_HASH_ALGORITHM_KEY]
+                if entry[SW_CAP_ECMP_HASH_ALGORITHM_CAPABLE_KEY] == 'true'
+                else 'not supported'
+            )
+            lag_hash_field = (
+                entry[SW_CAP_HASH_FIELD_LIST_KEY]
+                if entry[SW_CAP_LAG_HASH_CAPABLE_KEY] == 'true'
+                else 'not supported'
+            )
+            lag_algorithm = (
+                entry[SW_CAP_LAG_HASH_ALGORITHM_KEY]
+                if entry[SW_CAP_LAG_HASH_ALGORITHM_CAPABLE_KEY] == 'true'
+                else 'not supported'
+            )
             json_dict = {
                 "ecmp": {
-                    "hash_field": entry[SW_CAP_HASH_FIELD_LIST_KEY] if entry[SW_CAP_ECMP_HASH_CAPABLE_KEY] == 'true' else 'not supported',
-                    "algorithm": entry[SW_CAP_ECMP_HASH_ALGORITHM_KEY] if entry[SW_CAP_ECMP_HASH_ALGORITHM_CAPABLE_KEY] == 'true' else 'not supported'
+                    "hash_field": ecmp_hash_field,
+                    "algorithm": ecmp_algorithm
                 },
                 "lag": {
-                    "hash_field": entry[SW_CAP_HASH_FIELD_LIST_KEY] if entry[SW_CAP_LAG_HASH_CAPABLE_KEY] == 'true' else 'not supported',
-                    "algorithm": entry[SW_CAP_LAG_HASH_ALGORITHM_KEY] if entry[SW_CAP_LAG_HASH_ALGORITHM_CAPABLE_KEY] == 'true' else 'not supported'
+                    "hash_field": lag_hash_field,
+                    "algorithm": lag_algorithm
                 }
             }
             click.echo(json.dumps(json_dict, indent=4))

@@ -65,8 +65,6 @@ class TestHashMultiAsic:
         os.environ['UTILITIES_UNIT_TESTING'] = "0"
         os.environ["UTILITIES_UNIT_TESTING_TOPOLOGY"] = ""
 
-        # Restore single-asic state
-        import mock_tables.mock_single_asic
         from mock_tables import dbconnector
         dbconnector.load_database_config()
 
@@ -83,9 +81,7 @@ class TestHashMultiAsic:
             del config.config.commands[sonic_hash_config.SWITCH_HASH.name]
         sonic_hash_config.register(config.config)
 
-
-    ########## CONFIG SWITCH-HASH GLOBAL (multi-asic) ##########
-
+    # CONFIG SWITCH-HASH GLOBAL (multi-asic)
 
     @patch.object(click.Choice, 'convert', MagicMock(return_value='asic0'))
     @pytest.mark.parametrize(
@@ -129,9 +125,7 @@ class TestHashMultiAsic:
 
         assert result.exit_code == SUCCESS
 
-
-    ########## SHOW SWITCH-HASH GLOBAL (multi-asic) ##########
-
+    # SHOW SWITCH-HASH GLOBAL (multi-asic)
 
     def test_show_hash_global_multi_asic_all_ns(self):
         db = Db()
@@ -164,9 +158,7 @@ class TestHashMultiAsic:
         assert result.output == assert_show_output.show_hash_global_multi_asic_single_ns
         assert result.exit_code == SUCCESS
 
-
-    ########## SHOW SWITCH-HASH CAPABILITIES (multi-asic) ##########
-
+    # SHOW SWITCH-HASH CAPABILITIES (multi-asic)
 
     def test_show_hash_capabilities_multi_asic_all_ns(self):
         db = Db()
