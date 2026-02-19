@@ -65,6 +65,8 @@ class TestHashMultiAsic:
         os.environ['UTILITIES_UNIT_TESTING'] = "0"
         os.environ["UTILITIES_UNIT_TESTING_TOPOLOGY"] = ""
 
+        from mock_tables import mock_single_asic
+        importlib.reload(mock_single_asic)
         from mock_tables import dbconnector
         dbconnector.load_database_config()
 
