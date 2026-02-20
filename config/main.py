@@ -9367,7 +9367,8 @@ def set_ipv6_link_local_only_on_interface(config_db, interface_dict, interface_t
 
 @config.group()
 @click.option('-n', '--namespace', help='Namespace name',
-              required=True if multi_asic.is_multi_asic() else False, type=click.Choice(multi_asic.get_namespace_list()))
+              required=True if multi_asic.is_multi_asic() else False,
+              type=click.Choice(multi_asic.get_namespace_list()))
 @click.pass_context
 def ipv6(ctx, namespace):
     """IPv6 configuration"""
