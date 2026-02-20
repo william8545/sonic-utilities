@@ -22,7 +22,6 @@ class TestIPv6LinkLocalMultiAsic(object):
         print("SETUP")
         os.environ['UTILITIES_UNIT_TESTING'] = "1"
         os.environ["UTILITIES_UNIT_TESTING_TOPOLOGY"] = "multi_asic"
-        import mock_tables.dbconnector
         from .mock_tables import dbconnector
         from .mock_tables import mock_multi_asic
         importlib.reload(mock_multi_asic)
@@ -140,7 +139,7 @@ class TestIPv6LinkLocalMultiAsic(object):
         print("TEARDOWN")
         os.environ["UTILITIES_UNIT_TESTING"] = "0"
         os.environ["UTILITIES_UNIT_TESTING_TOPOLOGY"] = ""
-        from .mock_tables import dbconnector
+        from .mock_tables importg dbconnector
         from .mock_tables import mock_single_asic
         importlib.reload(mock_single_asic)
         dbconnector.dedicated_dbs = {}
