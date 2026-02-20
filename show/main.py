@@ -1570,7 +1570,7 @@ def link_local_mode(namespace, verbose):
     ns_list = masic.get_ns_list_based_on_options()
 
     for ns in ns_list:
-        config_db = ConfigDBConnector(use_unix_socket_path=True, namespace=ns)
+        config_db = ConfigDBConnector(namespace=ns)
         config_db.connect()
         interface = ""
 
