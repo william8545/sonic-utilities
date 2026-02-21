@@ -9499,7 +9499,6 @@ def subinterface(ctx, namespace, redis_unix_socket_path):
     kwargs = {'namespace': str(namespace)}
     if redis_unix_socket_path:
         kwargs['unix_socket_path'] = redis_unix_socket_path
-    if redis_unix_socket_path or multi_asic.is_multi_asic():
         kwargs['use_unix_socket_path'] = True
     config_db = ConfigDBConnector(**kwargs)
     config_db.connect(wait_for_init=False)
