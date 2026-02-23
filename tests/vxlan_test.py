@@ -18,8 +18,8 @@ mock_db_path = os.path.join(test_path, "vnet_input")
 show_vxlan_interface_output="""\
 VTEP Information:
 
-    VTEP Name : vtep1, SIP  : 1.1.1.1
-    NVO Name  : nvo1,  VTEP : vtep1
+\tVTEP Name : vtep1, SIP  : 1.1.1.1
+\tNVO Name  : nvo1,  VTEP : vtep1
 """
 
 show_vxlan_vlanvnimap_output="""\
