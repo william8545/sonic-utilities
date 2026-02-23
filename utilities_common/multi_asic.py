@@ -121,6 +121,7 @@ def multi_asic_click_options(func):
         func = option(func)
     return func
 
+
 def multi_asic_click_option_namespace(func=None, required=False, default=None,
                                       type=None, show_default=True,
                                       help=None, callback=None):
@@ -219,7 +220,8 @@ def multi_asic_get_ip_intf_addr_from_ns(namespace, iface):
 
 def multi_asic_get_ns_list(namespace=None):
     """Get namespace list to iterate. Returns all if namespace is None on multi-asic."""
-    if namespace is not None and namespace != constants.DEFAULT_NAMESPACE and namespace not in multi_asic.get_namespace_list():
+    if (namespace is not None and namespace != constants.DEFAULT_NAMESPACE and
+            namespace not in multi_asic.get_namespace_list()):
         raise ValueError('Unknown Namespace {}'.format(namespace))
     if not multi_asic.is_multi_asic():
         return [constants.DEFAULT_NAMESPACE]

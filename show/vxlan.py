@@ -39,8 +39,10 @@ def name(vxlan_name):
             r.append(vxlan_name)
             r.append(vxlan_data.get('src_ip'))
             r.append(vxlan_data.get('dst_ip'))
-            vxlan_map_keys = config_db.keys(config_db.CONFIG_DB,
-                                            'VXLAN_TUNNEL_MAP{}{}{}*'.format(config_db.KEY_SEPARATOR, vxlan_name, config_db.KEY_SEPARATOR))
+            vxlan_map_keys = config_db.keys(
+                config_db.CONFIG_DB,
+                'VXLAN_TUNNEL_MAP{}{}{}*'.format(
+                    config_db.KEY_SEPARATOR, vxlan_name, config_db.KEY_SEPARATOR))
             if vxlan_map_keys:
                 for key in natsorted(vxlan_map_keys):
                     vxlan_map_mapping = config_db.get_all(config_db.CONFIG_DB, key)
@@ -80,8 +82,10 @@ def tunnel():
             r.append(k)
             r.append(vxlan_data[k].get('src_ip'))
             r.append(vxlan_data[k].get('dst_ip'))
-            vxlan_map_keys = config_db.keys(config_db.CONFIG_DB,
-                                            'VXLAN_TUNNEL_MAP{}{}{}*'.format(config_db.KEY_SEPARATOR, k, config_db.KEY_SEPARATOR))
+            vxlan_map_keys = config_db.keys(
+                config_db.CONFIG_DB,
+                'VXLAN_TUNNEL_MAP{}{}{}*'.format(
+                    config_db.KEY_SEPARATOR, k, config_db.KEY_SEPARATOR))
             if vxlan_map_keys:
                 for key in natsorted(vxlan_map_keys):
                     vxlan_map_mapping = config_db.get_all(config_db.CONFIG_DB, key)
@@ -150,6 +154,7 @@ def interface():
                 output = '\tSource interface  : ' + loopback
                 if vtep_sip != '0.0.0.0':
                     click.echo(output)
+
 
 @vxlan.command()
 @click.argument('count', required=False)
@@ -224,6 +229,7 @@ def vrfvnimap():
         output += ('%s\n' % (str(num)))
         click.echo(output)
 
+
 @vxlan.command()
 @click.argument('count', required=False)
 def remotevtep(count):
@@ -256,7 +262,10 @@ def remotevtep(count):
                     vxlan_table = db.get_all(db.STATE_DB, key)
                     if vxlan_table is None:
                         continue
-                    body.append([vxlan_table['src_ip'], vxlan_table['dst_ip'], vxlan_table['tnl_src'], 'oper_' + vxlan_table['operstatus']])
+                    body.append([
+                        vxlan_table['src_ip'], vxlan_table['dst_ip'],
+                        vxlan_table['tnl_src'], 'oper_' + vxlan_table['operstatus']
+                    ])
                     total_count += 1
 
         if count is not None:
@@ -268,6 +277,7 @@ def remotevtep(count):
             output = 'Total count : '
             output += ('%s\n' % (str(total_count)))
             click.echo(output)
+
 
 @vxlan.command()
 @click.argument('remote_vtep_ip', required=True)
@@ -322,6 +332,7 @@ def remotevni(remote_vtep_ip, count):
             output = 'Total count : '
             output += ('%s\n' % (str(total_count)))
             click.echo(output)
+
 
 @vxlan.command()
 @click.argument('remote_vtep_ip', required=True)

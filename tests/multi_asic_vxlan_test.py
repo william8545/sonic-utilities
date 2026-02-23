@@ -254,7 +254,7 @@ class TestMultiAsicVxlan:
         reload(mock_multi_asic)
         from mock_tables import dbconnector
         dbconnector.load_namespace_config()
-        
+
         reload(utilities_common.multi_asic)
         reload(show.vxlan)
         reload(show.main)

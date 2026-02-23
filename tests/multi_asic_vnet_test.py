@@ -238,7 +238,7 @@ class TestMultiAsicVnet:
         reload(show.vnet)
         reload(show.main)
         reload(config.main)
-    
+
     def test_show_vnet_brief_all_namespaces(self):
         runner = CliRunner()
         result = runner.invoke(show.main.cli.commands["vnet"], ["brief"])
@@ -254,7 +254,7 @@ class TestMultiAsicVnet:
         print("output: {}".format(result.output))
         assert result.exit_code == 0
         assert result.output == show_vnet_brief_asic0_output
-    
+
     def test_show_vnet_name_found_in_asic0(self):
         runner = CliRunner()
         result = runner.invoke(show.main.cli.commands["vnet"], ["name", "Vnet_2000"])
@@ -286,7 +286,7 @@ class TestMultiAsicVnet:
         print("output: {}".format(result.output))
         assert result.exit_code == 0
         assert result.output == show_vnet_name_vnet2000_specific_ns_output
-    
+
     def test_show_vnet_guid_found(self):
         runner = CliRunner()
         result = runner.invoke(show.main.cli.commands["vnet"], ["guid", "guid-2000-asic0"])
@@ -310,7 +310,7 @@ class TestMultiAsicVnet:
         print("output: {}".format(result.output))
         assert result.exit_code == 0
         assert result.output == show_vnet_guid_not_found_output
-    
+
     def test_show_vnet_alias_all_namespaces(self):
         runner = CliRunner()
         result = runner.invoke(show.main.cli.commands["vnet"], ["alias"])
@@ -326,7 +326,7 @@ class TestMultiAsicVnet:
         print("output: {}".format(result.output))
         assert result.exit_code == 0
         assert result.output == show_vnet_alias_specific_output
-    
+
     def test_show_vnet_interfaces_all_namespaces(self):
         runner = CliRunner()
         result = runner.invoke(show.main.cli.commands["vnet"], ["interfaces"])
@@ -342,7 +342,7 @@ class TestMultiAsicVnet:
         print("output: {}".format(result.output))
         assert result.exit_code == 0
         assert result.output == show_vnet_interfaces_asic1_output
-    
+
     def test_show_vnet_neighbors_all_namespaces(self):
         runner = CliRunner()
         result = runner.invoke(show.main.cli.commands["vnet"], ["neighbors"])
@@ -358,7 +358,7 @@ class TestMultiAsicVnet:
         print("output: {}".format(result.output))
         assert result.exit_code == 0
         assert result.output == show_vnet_neighbors_asic0_output
-    
+
     def test_show_vnet_routes_all_all_namespaces(self):
         runner = CliRunner()
         result = runner.invoke(show.main.cli.commands["vnet"], ["routes", "all"])
@@ -374,7 +374,7 @@ class TestMultiAsicVnet:
         print("output: {}".format(result.output))
         assert result.exit_code == 0
         assert result.output == show_vnet_routes_all_asic0_output
-    
+
     def test_show_vnet_routes_tunnel_all_namespaces(self):
         runner = CliRunner()
         result = runner.invoke(show.main.cli.commands["vnet"], ["routes", "tunnel"])
@@ -390,7 +390,7 @@ class TestMultiAsicVnet:
         print("output: {}".format(result.output))
         assert result.exit_code == 0
         assert result.output == show_vnet_routes_tunnel_asic1_output
-    
+
     def test_show_vnet_endpoint_all_namespaces(self):
         runner = CliRunner()
         result = runner.invoke(show.main.cli.commands["vnet"], ["endpoint"])
@@ -398,14 +398,14 @@ class TestMultiAsicVnet:
         print("output: {}".format(result.output))
         assert result.exit_code == 0
         assert result.output == show_vnet_endpoint_multi_asic_output
-    
+
     def test_show_vnet_brief_invalid_namespace(self):
         runner = CliRunner()
         result = runner.invoke(show.main.cli.commands["vnet"], ["-n", "invalid_ns", "brief"])
         print("exit_code: {}".format(result.exit_code))
         print("output: {}".format(result.output))
         assert result.exit_code != 0
-    
+
     def test_config_vnet_add_requires_namespace(self):
         runner = CliRunner()
         db = Db()
@@ -457,7 +457,7 @@ class TestMultiAsicVnet:
         print("output: {}".format(result.output))
         assert result.exit_code != 0
         assert "namespace" in result.output.lower() or "required" in result.output.lower()
-    
+
     def test_config_vnet_add_del_with_namespace(self):
         runner = CliRunner()
         db = Db()

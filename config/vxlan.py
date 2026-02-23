@@ -276,7 +276,7 @@ def add_vxlan_map_range(db, vxlan_name, vlan_start, vlan_end, vni_start):
     if clicommon.is_vlanid_in_range(vlan_end) is False:
         ctx.fail(" Invalid Vlan Id , Valid Range : 1 to 4094 ")
     if (vlan_start > vlan_end):
-       ctx.fail("vlan_end should be greater or equal to vlan_start")
+        ctx.fail("vlan_end should be greater or equal to vlan_start")
     if clicommon.vni_id_is_valid(vni_start) is False:
         ctx.fail("Invalid VNI {}. Valid range [1 to 16777215].".format(vni_start))
     if clicommon.vni_id_is_valid(vni_start+vlan_end-vlan_start) is False:
@@ -289,32 +289,32 @@ def add_vxlan_map_range(db, vxlan_name, vlan_start, vlan_end, vni_start):
     vxlan_keys = vxlan_table.keys()
 
     for vid in range (vlan_start, vlan_end):
-       vlan_name = 'Vlan{}'.format(vid)
-       vnid = vni_start+vid-vlan_start
-       vni_name = '{}'.format(vnid)
-       match_found = 'no'
-       if len(config_db.get_entry('VLAN', vlan_name)) == 0:
-         click.echo("{} not configured".format(vlan_name))
-         continue
-       if vxlan_keys is not None:
-          for key in vxlan_keys:
-            if (vxlan_table[key]['vlan'] == vlan_name):
-              print(vlan_name + " already mapped")
-              match_found = 'yes'
-              break
-            if (vxlan_table[key]['vni'] == vni_name):
-              print("VNI:" + vni_name + " already mapped ")
-              match_found = 'yes'
-              break
-       if (match_found == 'yes'):
-         continue
-       fvs = {'vni': vni_name,
-              'vlan' : vlan_name}
-       mapname = vxlan_name + '|' + 'map_' + vni_name + '_' + vlan_name
-       try:
-           config_db.set_entry('VXLAN_TUNNEL_MAP', mapname, fvs)
-       except ValueError as e:
-           ctx.fail("Invalid ConfigDB. Error: {}".format(e))
+        vlan_name = 'Vlan{}'.format(vid)
+        vnid = vni_start+vid-vlan_start
+        vni_name = '{}'.format(vnid)
+        match_found = 'no'
+        if len(config_db.get_entry('VLAN', vlan_name)) == 0:
+            click.echo("{} not configured".format(vlan_name))
+            continue
+        if vxlan_keys is not None:
+            for key in vxlan_keys:
+                if (vxlan_table[key]['vlan'] == vlan_name):
+                    print(vlan_name + " already mapped")
+                    match_found = 'yes'
+                    break
+                if (vxlan_table[key]['vni'] == vni_name):
+                    print("VNI:" + vni_name + " already mapped ")
+                    match_found = 'yes'
+                    break
+        if (match_found == 'yes'):
+            continue
+        fvs = {'vni': vni_name,
+               'vlan': vlan_name}
+        mapname = vxlan_name + '|' + 'map_' + vni_name + '_' + vlan_name
+        try:
+            config_db.set_entry('VXLAN_TUNNEL_MAP', mapname, fvs)
+        except ValueError as e:
+            ctx.fail("Invalid ConfigDB. Error: {}".format(e))
 
 @vxlan_map_range.command('del')
 @click.argument('vxlan_name', metavar='<vxlan_name>', required=True)
@@ -336,7 +336,7 @@ def del_vxlan_map_range(db, vxlan_name, vlan_start, vlan_end, vni_start):
     if clicommon.is_vlanid_in_range(vlan_end) is False:
         ctx.fail(" Invalid Vlan Id , Valid Range : 1 to 4094 ")
     if (vlan_start > vlan_end):
-       ctx.fail("vlan_end should be greater or equal to vlan_start")
+        ctx.fail("vlan_end should be greater or equal to vlan_start")
     if clicommon.vni_id_is_valid(vni_start) is False:
         ctx.fail("Invalid VNI {}. Valid range [1 to 16777215].".format(vni_start))
     if clicommon.vni_id_is_valid(vni_start+vlan_end-vlan_start) is False:
@@ -347,15 +347,15 @@ def del_vxlan_map_range(db, vxlan_name, vlan_start, vlan_end, vni_start):
 
     vlan_end = vlan_end + 1
     for vid in range (vlan_start, vlan_end):
-       vlan_name = 'Vlan{}'.format(vid)
-       vnid = vni_start+vid-vlan_start
-       vni_name = '{}'.format(vnid)
-       if clicommon.is_vni_vrf_mapped(config_db, vni_name) is False:
-           print("Skipping Vlan {} VNI {} mapped delete. ".format(vlan_name, vni_name))
-           continue
+        vlan_name = 'Vlan{}'.format(vid)
+        vnid = vni_start+vid-vlan_start
+        vni_name = '{}'.format(vnid)
+        if clicommon.is_vni_vrf_mapped(config_db, vni_name) is False:
+            print("Skipping Vlan {} VNI {} mapped delete. ".format(vlan_name, vni_name))
+            continue
 
-       mapname = vxlan_name + '|' + 'map_' + vni_name + '_' + vlan_name
-       try:
-           config_db.set_entry('VXLAN_TUNNEL_MAP', mapname, None)
-       except JsonPatchConflict as e:
-           ctx.fail("Invalid ConfigDB. Error: {}".format(e))
+        mapname = vxlan_name + '|' + 'map_' + vni_name + '_' + vlan_name
+        try:
+            config_db.set_entry('VXLAN_TUNNEL_MAP', mapname, None)
+        except JsonPatchConflict as e:
+            ctx.fail("Invalid ConfigDB. Error: {}".format(e))
