@@ -323,7 +323,6 @@ class TestSubinterface(object):
         assert result.exit_code == 0
         assert ('Po0004.1004') not in db.cfgdb.get_table('VLAN_SUB_INTERFACE')
 
-
     def test_subintf_via_group_command(self):
         runner = CliRunner()
         result = runner.invoke(config.config.commands["subinterface"],
