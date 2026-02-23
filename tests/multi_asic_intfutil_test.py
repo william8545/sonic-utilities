@@ -1,9 +1,7 @@
 import os
 import subprocess
-import sys
 
 import pytest
-from click.testing import CliRunner
 
 from .utils import get_result_and_return_code
 
@@ -99,7 +97,8 @@ Ethernet-BP0      up       up  Ethernet-BP0          ASIC1:Eth0-ASIC1
 Ethernet-BP4      up       up  Ethernet-BP4          ASIC1:Eth1-ASIC1
 """
 
-intf_invalid_asic_error="""ValueError: Unknown Namespace asic99"""
+intf_invalid_asic_error = """ValueError: Unknown Namespace asic99"""
+
 
 @pytest.mark.usefixtures("setup_multi_asic_env", "setup_env_paths")
 class TestInterfacesMultiAsic(object):

@@ -534,4 +534,3 @@ def setup_env_paths(request):
     yield
 
     os.environ["PATH"] = original_path
-
