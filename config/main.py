@@ -9489,7 +9489,8 @@ helper.load_and_register_plugins(plugins, config)
 #
 @config.group()
 @click.option('-n', '--namespace', help='Namespace name',
-                required=True if multi_asic.is_multi_asic() else False, type=click.Choice(multi_asic.get_namespace_list()))
+              required=True if multi_asic.is_multi_asic() else False,
+              type=click.Choice(multi_asic.get_namespace_list()))
 @click.option('-s', '--redis-unix-socket-path', help='unix socket path for redis connection')
 @click.pass_context
 def subinterface(ctx, namespace, redis_unix_socket_path):
