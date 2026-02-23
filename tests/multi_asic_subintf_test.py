@@ -1,7 +1,11 @@
+import os
+from unittest import mock
+
 import pytest
 from click.testing import CliRunner
 
 import config.main as config
+import show.main as show
 from utilities_common.db import Db
 
 
@@ -255,3 +259,29 @@ class TestSubinterfaceMultiAsic(object):
                                ["Ethernet64"], obj=obj)
         print(result.exit_code, result.output)
         assert result.exit_code != 0
+
+    def test_show_subinterfaces_status_multi_asic(self):
+        """Test show subinterfaces status builds correct command in multi-asic mode"""
+        status_cmd = show.cli.commands["subinterfaces"].commands["status"]
+        with mock.patch.object(show, 'run_command') as mock_run, \
+             mock.patch.object(show.multi_asic, 'is_multi_asic', return_value=True):
+            status_cmd.callback(
+                subinterfacename=None, namespace=None,
+                display="frontend", verbose=True
+            )
+            cmd = mock_run.call_args[0][0]
+            assert cmd == ['intfutil', '-c', 'status', '-i', 'subport',
+                           '-d', 'frontend']
+
+    def test_show_subinterfaces_status_multi_asic_with_namespace(self):
+        """Test show subinterfaces status passes namespace in multi-asic mode"""
+        status_cmd = show.cli.commands["subinterfaces"].commands["status"]
+        with mock.patch.object(show, 'run_command') as mock_run, \
+             mock.patch.object(show.multi_asic, 'is_multi_asic', return_value=True):
+            status_cmd.callback(
+                subinterfacename=None, namespace="asic0",
+                display="frontend", verbose=True
+            )
+            cmd = mock_run.call_args[0][0]
+            assert cmd == ['intfutil', '-c', 'status', '-i', 'subport',
+                           '-d', 'frontend', '-n', 'asic0']

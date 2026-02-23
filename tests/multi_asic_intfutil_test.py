@@ -295,3 +295,30 @@ class TestSubinterfacesMultiAsic(object):
         print("result = {}".format(result))
         assert return_code == 0
         assert 'Eth64.30' in result
+
+    def test_subintf_status_all_namespaces(self):
+        """Without -n, subinterfaces shown with Namespace column (frontend only)."""
+        return_code, result = get_result_and_return_code(
+            ['intfutil', '-c', 'status', '-i', 'subport']
+        )
+        print("return_code: {}".format(return_code))
+        print("result = {}".format(result))
+        assert return_code == 0
+        assert 'Namespace' in result
+        assert 'asic0' in result
+        assert 'PortChannel1002.10' in result
+        assert 'PortChannel4001.20' not in result
+
+    def test_subintf_status_all_namespaces_display_all(self):
+        """Without -n and display=all, subinterfaces from all namespaces shown."""
+        return_code, result = get_result_and_return_code(
+            ['intfutil', '-c', 'status', '-i', 'subport', '-d', 'all']
+        )
+        print("return_code: {}".format(return_code))
+        print("result = {}".format(result))
+        assert return_code == 0
+        assert 'Namespace' in result
+        assert 'asic0' in result
+        assert 'asic1' in result
+        assert 'PortChannel1002.10' in result
+        assert 'Ethernet64.10' in result
