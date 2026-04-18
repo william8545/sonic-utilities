@@ -10,6 +10,11 @@ installed_images = [
     f'{uboot.IMAGE_PREFIX}expeliarmus-abcde',
 ]
 
+# Helper: map an image to the slot it lives in. By convention in these
+# tests, installed_images[0] is slot 1 and installed_images[1] is slot 2.
+_slot_of = {installed_images[0]: 1, installed_images[1]: 2}
+
+
 class MockProc():
     commandline = "linuxargs="
     def communicate():
@@ -25,7 +30,7 @@ def test_set_default_image(mock_run_cmd):
     expected_call0, expected_call1 = [call(subcmd + image0)], [call(subcmd + image1)]
 
     bootloader = uboot.UbootBootloader()
-    bootloader.get_installed_images = Mock(return_value=installed_images)
+    bootloader._get_image_slot = Mock(side_effect=_slot_of.get)
     bootloader.set_default_image(installed_images[0])
     assert mock_run_cmd.call_args_list == expected_call0
 
@@ -34,19 +39,43 @@ def test_set_default_image(mock_run_cmd):
     assert mock_run_cmd.call_args_list == expected_call1
 
 @patch('sonic_installer.bootloader.uboot.run_command')
+def test_set_default_image_only_slot_2_populated(mock_run_cmd):
+    """Regression for the substring + list-index bug reproduced on an
+    AST2700 BMC. State: slot 1 empty, sole image lives in slot 2 ->
+    set_default_image must write ``run sonic_image_2`` (not ``sonic_image_1``,
+    which would point boot_next at the empty slot and brick the box)."""
+    bootloader = uboot.UbootBootloader()
+    bootloader._get_image_slot = Mock(return_value=2)
+
+    bootloader.set_default_image(installed_images[1])
+    assert mock_run_cmd.call_args_list == [
+        call(['/usr/bin/fw_setenv', 'boot_next', 'run sonic_image_2'])]
+
+@patch('sonic_installer.bootloader.uboot.run_command')
 def test_set_next_image(mock_run_cmd):
     subcmd = ['/usr/bin/fw_setenv', 'boot_once']
     image0, image1 = ['run sonic_image_1'], ['run sonic_image_2']
     expected_call0, expected_call1 = [call(subcmd + image0)], [call(subcmd + image1)]
 
     bootloader = uboot.UbootBootloader()
-    bootloader.get_installed_images = Mock(return_value=installed_images)
+    bootloader._get_image_slot = Mock(side_effect=_slot_of.get)
     bootloader.set_next_image(installed_images[0])
     assert mock_run_cmd.call_args_list == expected_call0
 
     mock_run_cmd.call_args_list = []
     bootloader.set_next_image(installed_images[1])
     assert mock_run_cmd.call_args_list == expected_call1
+
+@patch('sonic_installer.bootloader.uboot.run_command')
+def test_set_next_image_only_slot_2_populated(mock_run_cmd):
+    """Same regression as set_default — slot 1 empty, image in slot 2
+    must write ``run sonic_image_2`` into boot_once, not sonic_image_1."""
+    bootloader = uboot.UbootBootloader()
+    bootloader._get_image_slot = Mock(return_value=2)
+
+    bootloader.set_next_image(installed_images[1])
+    assert mock_run_cmd.call_args_list == [
+        call(['/usr/bin/fw_setenv', 'boot_once', 'run sonic_image_2'])]
 
 @patch("sonic_installer.bootloader.uboot.run_command")
 def test_install_image(mock_run_cmd):
@@ -57,21 +86,44 @@ def test_install_image(mock_run_cmd):
     bootloader.install_image(image_path)
     assert mock_run_cmd.call_args_list == expected_call
 
+def _mock_boot_once_popen(boot_once_value):
+    """Return a Popen stub that replies to ``fw_printenv -n boot_once``
+    with ``boot_once_value`` and returncode 0."""
+    def factory(cmd, *args, **kwargs):
+        proc = Mock()
+        proc.communicate.return_value = (boot_once_value, None)
+        proc.returncode = 0
+        return proc
+    return factory
+
+
+@patch("sonic_installer.bootloader.uboot.subprocess.Popen")
 @patch("sonic_installer.bootloader.uboot.subprocess.call", Mock())
 @patch("sonic_installer.bootloader.uboot.run_command")
-def test_remove_image(run_command_patch):
+def test_remove_image(run_command_patch, popen_patch):
     # Constants
     image_path_prefix = os.path.join(uboot.HOST_PATH, uboot.IMAGE_DIR_PREFIX)
     exp_image_path = [
         f'{image_path_prefix}expeliarmus-{uboot.IMAGE_PREFIX}abcde',
         f'{image_path_prefix}expeliarmus-abcde'
     ]
+    # boot_once empty -> conditional clear must NOT fire
+    popen_patch.side_effect = _mock_boot_once_popen("")
 
     bootloader = uboot.UbootBootloader()
-    bootloader.get_installed_images = Mock(return_value=installed_images)
+    bootloader._get_image_slot = Mock(side_effect=_slot_of.get)
 
-    # Verify rm command was executed with image path
+    # Removing the slot-1 image: boot_next should flip to slot 2,
+    # sonic_version_1 -> NONE, /host/image-<slot1>/ is rm -rf'd.
     bootloader.remove_image(installed_images[0])
+    assert call(['/usr/bin/fw_setenv', 'boot_next', 'run sonic_image_2']) \
+        in run_command_patch.call_args_list
+    assert call(['/usr/bin/fw_setenv', 'sonic_version_1', 'NONE']) \
+        in run_command_patch.call_args_list
+    # boot_once was empty — it must NOT have been written
+    assert call(['/usr/bin/fw_setenv', 'boot_once', '']) \
+        not in run_command_patch.call_args_list
+
     args_list = uboot.subprocess.call.call_args_list
     assert len(args_list) > 0
 
@@ -79,12 +131,55 @@ def test_remove_image(run_command_patch):
     assert exp_image_path[0] in args[0]
 
     uboot.subprocess.call.call_args_list = []
+    run_command_patch.reset_mock()
+
+    # Removing the slot-2 image: boot_next flips to slot 1, sonic_version_2 -> NONE.
     bootloader.remove_image(installed_images[1])
+    assert call(['/usr/bin/fw_setenv', 'boot_next', 'run sonic_image_1']) \
+        in run_command_patch.call_args_list
+    assert call(['/usr/bin/fw_setenv', 'sonic_version_2', 'NONE']) \
+        in run_command_patch.call_args_list
+
     args_list = uboot.subprocess.call.call_args_list
     assert len(args_list) > 0
 
     args, _ = args_list[0]
     assert exp_image_path[1] in args[0]
+
+
+@patch("sonic_installer.bootloader.uboot.subprocess.Popen")
+@patch("sonic_installer.bootloader.uboot.subprocess.call", Mock())
+@patch("sonic_installer.bootloader.uboot.run_command")
+def test_remove_image_clears_boot_once_pointing_at_removed_slot(
+        run_command_patch, popen_patch):
+    """Regression: if boot_once points at the slot being removed, remove_image
+    must clear boot_once — otherwise the next reboot runs
+    'run sonic_image_<removed>' into stale / empty pointers and can brick."""
+    popen_patch.side_effect = _mock_boot_once_popen("run sonic_image_1")
+
+    bootloader = uboot.UbootBootloader()
+    bootloader._get_image_slot = Mock(return_value=1)
+
+    bootloader.remove_image(installed_images[0])
+    assert call(['/usr/bin/fw_setenv', 'boot_once', '']) \
+        in run_command_patch.call_args_list
+
+
+@patch("sonic_installer.bootloader.uboot.subprocess.Popen")
+@patch("sonic_installer.bootloader.uboot.subprocess.call", Mock())
+@patch("sonic_installer.bootloader.uboot.run_command")
+def test_remove_image_preserves_boot_once_pointing_at_other_slot(
+        run_command_patch, popen_patch):
+    """Complementary: if boot_once points at the slot that is NOT being
+    removed (i.e. will still be bootable), leave it alone."""
+    popen_patch.side_effect = _mock_boot_once_popen("run sonic_image_2")
+
+    bootloader = uboot.UbootBootloader()
+    bootloader._get_image_slot = Mock(return_value=1)  # removing slot 1
+
+    bootloader.remove_image(installed_images[0])
+    assert call(['/usr/bin/fw_setenv', 'boot_once', '']) \
+        not in run_command_patch.call_args_list
 
 @patch("sonic_installer.bootloader.uboot.subprocess.Popen")
 @patch("sonic_installer.bootloader.uboot.run_command")
@@ -104,13 +199,56 @@ def test_get_next_image(run_command_patch, popen_patch):
 
     bootloader = uboot.UbootBootloader()
     bootloader.get_installed_images = Mock(return_value=installed_images)
+    bootloader._get_image_slot = Mock(side_effect=_slot_of.get)
 
     bootloader.set_default_image(installed_images[1])
-    
+
     # Verify get_next_image was executed with image path
     next_image=bootloader.get_next_image()
 
     assert next_image == installed_images[1]
+
+@patch("sonic_installer.bootloader.uboot.subprocess.Popen")
+def test_get_image_slot(popen_patch):
+    """Direct coverage of the _get_image_slot helper."""
+    env = {
+        "sonic_version_1": installed_images[0],
+        "sonic_version_2": installed_images[1],
+    }
+
+    def fake_popen(cmd, *args, **kwargs):
+        var = cmd[-1]
+        proc = Mock()
+        value = env.get(var, "")
+        proc.communicate.return_value = (value, None)
+        proc.returncode = 0 if var in env else 1
+        return proc
+    popen_patch.side_effect = fake_popen
+
+    bootloader = uboot.UbootBootloader()
+    assert bootloader._get_image_slot(installed_images[0]) == 1
+    assert bootloader._get_image_slot(installed_images[1]) == 2
+    assert bootloader._get_image_slot("SONiC-OS-ghost.0") is None
+
+@patch("sonic_installer.bootloader.uboot.subprocess.Popen")
+def test_get_image_slot_substring_safe(popen_patch):
+    """The helper must use ``==`` not ``in`` so that names which are
+    substrings of each other don't mis-map."""
+    shorter = f"{uboot.IMAGE_PREFIX}A"
+    longer = f"{uboot.IMAGE_PREFIX}A-new"   # contains ``shorter`` as substring
+    env = {"sonic_version_1": longer, "sonic_version_2": shorter}
+
+    def fake_popen(cmd, *args, **kwargs):
+        var = cmd[-1]
+        proc = Mock()
+        proc.communicate.return_value = (env.get(var, ""), None)
+        proc.returncode = 0
+        return proc
+    popen_patch.side_effect = fake_popen
+
+    bootloader = uboot.UbootBootloader()
+    assert bootloader._get_image_slot(shorter) == 2
+    assert bootloader._get_image_slot(longer) == 1
 
 @patch("sonic_installer.bootloader.uboot.subprocess.Popen")
 @patch("sonic_installer.bootloader.uboot.run_command")
