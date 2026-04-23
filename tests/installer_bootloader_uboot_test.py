@@ -38,6 +38,7 @@ def test_set_default_image(mock_run_cmd):
     bootloader.set_default_image(installed_images[1])
     assert mock_run_cmd.call_args_list == expected_call1
 
+
 @patch('sonic_installer.bootloader.uboot.run_command')
 def test_set_default_image_only_slot_2_populated(mock_run_cmd):
     """Regression for the substring + list-index bug reproduced on an
@@ -50,6 +51,7 @@ def test_set_default_image_only_slot_2_populated(mock_run_cmd):
     bootloader.set_default_image(installed_images[1])
     assert mock_run_cmd.call_args_list == [
         call(['/usr/bin/fw_setenv', 'boot_next', 'run sonic_image_2'])]
+
 
 @patch('sonic_installer.bootloader.uboot.run_command')
 def test_set_next_image(mock_run_cmd):
@@ -65,6 +67,7 @@ def test_set_next_image(mock_run_cmd):
     mock_run_cmd.call_args_list = []
     bootloader.set_next_image(installed_images[1])
     assert mock_run_cmd.call_args_list == expected_call1
+
 
 @patch('sonic_installer.bootloader.uboot.run_command')
 def test_set_next_image_only_slot_2_populated(mock_run_cmd):
@@ -85,6 +88,7 @@ def test_install_image(mock_run_cmd):
     bootloader = uboot.UbootBootloader()
     bootloader.install_image(image_path)
     assert mock_run_cmd.call_args_list == expected_call
+
 
 def _mock_boot_once_popen(boot_once_value):
     """Return a Popen stub that replies to ``fw_printenv -n boot_once``
@@ -204,9 +208,10 @@ def test_get_next_image(run_command_patch, popen_patch):
     bootloader.set_default_image(installed_images[1])
 
     # Verify get_next_image was executed with image path
-    next_image=bootloader.get_next_image()
+    next_image = bootloader.get_next_image()
 
     assert next_image == installed_images[1]
+
 
 @patch("sonic_installer.bootloader.uboot.subprocess.Popen")
 def test_get_image_slot(popen_patch):
@@ -229,6 +234,7 @@ def test_get_image_slot(popen_patch):
     assert bootloader._get_image_slot(installed_images[0]) == 1
     assert bootloader._get_image_slot(installed_images[1]) == 2
     assert bootloader._get_image_slot("SONiC-OS-ghost.0") is None
+
 
 @patch("sonic_installer.bootloader.uboot.subprocess.Popen")
 def test_get_image_slot_substring_safe(popen_patch):
